@@ -62,11 +62,72 @@
 # measurement.
 
 # How many measurements are larger than the previous measurement?
+# 1448 -> correct
+
+# --- Part Two ---
+
+# Considering every single measurement isn't as useful as you expected:
+# there's just too much noise in the data.
+
+# Instead, consider sums of a three-measurement sliding window. Again
+# considering the above example:
+
+# 199  A
+# 200  A B
+# 208  A B C
+# 210    B C D
+# 200  E   C D
+# 207  E F   D
+# 240  E F G
+# 269    F G H
+# 260      G H
+# 263        H
+
+# Start by comparing the first and second three-measurement windows. The
+# measurements in the first window are marked A (199, 200, 208); their sum is
+# 199 + 200 + 208 = 607. The second window is marked B (200, 208, 210); its sum
+# is 618. The sum of measurements in the second window is larger than the sum
+# of the first, so this first comparison increased.
+
+# Your goal now is to count the number of times the sum of measurements in this
+# sliding window increases from the previous sum. So, compare A with B, then
+# compare B with C, then C with D, and so on. Stop when there aren't enough
+# measurements left to create a new three-measurement sum.
+
+# In the above example, the sum of each three-measurement window is as follows:
+
+# A: 607 (N/A - no previous sum)
+# B: 618 (increased)
+# C: 618 (no change)
+# D: 617 (decreased)
+# E: 647 (increased)
+# F: 716 (increased)
+# G: 769 (increased)
+# H: 792 (increased)
+
+# In this example, there are 5 sums that are larger than the previous sum.
+
+# Consider sums of a three-measurement sliding window. How many sums are
+# larger than the previous sum?
+
+#
+#  Thinking:
+#  So there's no need for any of that grouping, it's the same question just
+#  instead of comparing the one before it's one 3 before
+#  for any given list [a, b, c, d, e, f] we can see that the
+#  first group [a, b, c] shares [b, c] with the next group, [b, c, d] so
+#  the question boils down to is d greater than a. The next two groups yield
+#  [b, c, d] and [c, d, e] so it's is e greater than b...
+#
+#  The previous function will be fine, we just need to adjust the starting
+#  point and window size.
+#
+
 
 from typing import List
 
 
-def count_increases(list_of_depths: List[int]) -> int:
+def count_increases(list_of_depths: List[int], window_size: int = 1) -> int:
     """
     For each value in the input list, if it is larger than the previous one
     add one to the total, returning that total as the result.
@@ -74,8 +135,8 @@ def count_increases(list_of_depths: List[int]) -> int:
     result = 0
 
     bigger_than_previous = [
-        1 if list_of_depths[i] > list_of_depths[i - 1] else 0
-        for i in range(1, len(list_of_depths))
+        1 if list_of_depths[i] > list_of_depths[i - window_size] else 0
+        for i in range(window_size, len(list_of_depths))
     ]
 
     result = sum(bigger_than_previous)
@@ -108,6 +169,12 @@ def part1(filename):
     return result
 
 
+def part2(filename):
+    the_list = load_integers_from_file(filename)
+    result = count_increases(the_list, window_size=3)
+    return result
+
+
 if __name__ == "__main__":
     test_filename = "test_input.txt"
     test_answer = part1(test_filename)
@@ -115,3 +182,8 @@ if __name__ == "__main__":
     filename = "puzzle_input.txt"
     answer = part1(filename)
     print(f"The answer for part1 is {answer}")
+    # and part 2
+    test_answer = part2(test_filename)
+    assert 5 == test_answer
+    answer = part2(filename)
+    print(f"The answer for part2 is {answer}")

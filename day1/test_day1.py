@@ -38,6 +38,25 @@ def test_count_increases(input_list, expected_result):
     assert actual_result == expected_result
 
 
+@pytest.mark.parametrize(
+    "input_list,window_size,expected_result",
+    [
+        ([1, 2, 3], 2, 1),
+        ([], 3, 0),
+        ([1], 3, 0),
+        ([1, 2], 3, 0),
+        ([1, 2, 3], 3, 0),
+        ([1, 2, 3, 4], 3, 1),
+        ([1, 2, 3, 4, 5], 3, 2),
+        ([100, 99, 100, 101, 98, 100], 3, 1),
+        ([1001, 1002, 1003, 1004, 1005, 1005, 1005, 1006], 3, 5),
+    ],
+)
+def test_count_increases_windowed(input_list, window_size, expected_result):
+    actual_result = count_increases(input_list, window_size)
+    assert actual_result == expected_result
+
+
 def test_load_integers_from_file(good_file):
     # Positive testing for now
     result = load_integers_from_file(good_file)

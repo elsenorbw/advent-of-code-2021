@@ -67,16 +67,28 @@
 
 # Both the oxygen generator rating and the CO2 scrubber rating are values that
 # can be found in your diagnostic report - finding them is the tricky part.
-# Both values are located using a similar process that involves filtering out values until only one remains. Before searching for either rating value, start with the full list of binary numbers from your diagnostic report and consider just the first bit of those numbers. Then:
+# Both values are located using a similar process that involves filtering out
+# values until only one remains. Before searching for either rating value,
+# start with the full list of binary numbers from your diagnostic report and
+# consider just the first bit of those numbers. Then:
 
-#     Keep only numbers selected by the bit criteria for the type of rating value for which you are searching. Discard numbers which do not match the bit criteria.
-#     If you only have one number left, stop; this is the rating value for which you are searching.
+#     Keep only numbers selected by the bit criteria for the type of rating
+#       value for which you are searching. Discard numbers which do not match
+#       the bit criteria.
+#     If you only have one number left, stop; this is the rating value for
+#       which you are searching.
 #     Otherwise, repeat the process, considering the next bit to the right.
 
 # The bit criteria depends on which type of rating value you want to find:
 
-#     To find oxygen generator rating, determine the most common value (0 or 1) in the current bit position, and keep only numbers with that bit in that position. If 0 and 1 are equally common, keep values with a 1 in the position being considered.
-#     To find CO2 scrubber rating, determine the least common value (0 or 1) in the current bit position, and keep only numbers with that bit in that position. If 0 and 1 are equally common, keep values with a 0 in the position being considered.
+#     To find oxygen generator rating, determine the most common value (0 or 1)
+#       in the current bit position, and keep only numbers with that bit in
+#       that position. If 0 and 1 are equally common, keep values with a 1 in
+#       the position being considered.
+#     To find CO2 scrubber rating, determine the least common value (0 or 1) in
+#       the current bit position, and keep only numbers with that bit in that
+#       position. If 0 and 1 are equally common, keep values with a 0 in the
+#       position being considered.
 
 # For example, to determine the oxygen generator rating value using the same example diagnostic report from above:
 
@@ -108,6 +120,8 @@ class DiagnosticReport:
     bit_counts: Optional[List[int]] = None
     # A list of the total number of values
     value_counts: int = 0
+    # and store the individual bit strings as a list
+    bit_strings: List[str] = []
 
     def __repr__(self) -> str:
         return f"({self.value_counts}) -> {self.bit_counts}"
@@ -125,6 +139,9 @@ class DiagnosticReport:
             if "1" == bit:
                 self.bit_counts[idx] += 1
 
+        # and store the whole string
+        self.bit_strings.append(bitstring)
+
         # and we have added one row
         self.value_counts += 1
 
@@ -137,6 +154,83 @@ class DiagnosticReport:
                     self.add_one_bitstring(this_line)
                     # and debug
                     # print(f"{this_line} {self}")
+
+    def find_oxygen_scrubber(self):
+        return self.filter_find(True, True)
+
+    def find_co2_scrubber(self):
+        return self.filter_find(False, False)
+
+    def filter_find(self, find_most_common: bool, prefer_ones: bool) -> int:
+        #
+        #  find_most_common - set to True if we're looking for the ocygen generator case
+        #                     set to False if we're looking for the CO2 scrubber
+        #
+        #  prefers_ones - what to do in the event of a tie, True for oxygen generator
+        #                     False for CO2
+        #
+        # To find oxygen generator rating, determine the most common value (0 or 1)
+        # in the current bit position, and keep only numbers with that bit in
+        # that position. If 0 and 1 are equally common, keep values with a 1 in
+        # the position being considered.
+        #
+        #  IMPORTANT NOTE: WE NEED TO CONSIDER WHAT IS MOST PREVALENT OF THE REMAINING SET
+        #    EACH REDUCTION PASS, SO SOME SORT OF DIRTY LOOPING / RECURSION THING :)
+        #
+        result: int = -1
+        candidates = self.bit_strings.copy()
+        target_bit_index = 0
+
+        while len(candidates) > 1:
+            print(f"Starting candidate filter with {len(candidates)} candidates")
+            #
+            #  Whittle the list down a bit more.. (bit, get it?)
+            #
+            ones = []
+            zeroes = []
+
+            # sort everything into either the ones or zeros pile
+            for this_bitmask in candidates:
+                the_bit = this_bitmask[target_bit_index]
+                if "0" == the_bit:
+                    zeroes.append(this_bitmask)
+                elif "1" == the_bit:
+                    ones.append(this_bitmask)
+                else:
+                    raise ValueError(
+                        "What the hell kind of bit is {the_bit} from {this_bitmask} ?"
+                    )
+
+            # ok, we have both lists, which one do we need to keep ?
+            if len(ones) > len(zeroes):
+                if find_most_common:
+                    candidates = ones
+                else:
+                    candidates = zeroes
+            elif len(ones) < len(zeroes):
+                if find_most_common:
+                    candidates = zeroes
+                else:
+                    candidates = ones
+            else:
+                # we have even-stevens, dealers choice
+                if prefer_ones:
+                    candidates = ones
+                else:
+                    candidates = zeroes
+
+            # and we need to look at the next bit
+            target_bit_index += 1
+
+        # and we have the final value
+        final_value = candidates[0]
+        result = 0
+        for this_bit in final_value:
+            result *= 2
+            if "1" == this_bit:
+                result += 1
+
+        return result
 
     def calculate_gamma_epsilon_rates(self) -> Tuple[int, int]:
         """
@@ -174,13 +268,29 @@ def part1(filename: str):
     return gamma * epsilon
 
 
+def part2(filename: str):
+    report = DiagnosticReport()
+    report.load_file(filename)
+    oxygen = report.find_oxygen_scrubber()
+    co2 = report.find_co2_scrubber()
+    result = oxygen * co2
+    print(f"Oxygen:{oxygen}, CO2:{co2}, result:{result}")
+    return result
+
+
 if __name__ == "__main__":
     test_filename = "test_input.txt"
     puzzle_input = "puzzle_input.txt"
 
-    test_result = part1(test_filename)
-    print(f"Test Part 1 is {test_result}")
-    assert test_result == 198
+    # test_result = part1(test_filename)
+    # print(f"Test Part 1 is {test_result}")
+    # assert test_result == 198
 
-    part1_result = part1(puzzle_input)
-    print(f"Part1 result is {part1_result}")
+    # part1_result = part1(puzzle_input)
+    # print(f"Part1 result is {part1_result}")
+
+    test_result = part2(test_filename)
+    print(f"Part2 test result: {test_result}")
+    assert 230 == test_result
+    part2_result = part2(puzzle_input)
+    print(f"Part2 actual result: {part2_result}")

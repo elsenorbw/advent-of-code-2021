@@ -1,0 +1,50 @@
+fdgacbe cefdb cefbgd gcbe
+fcgedb cgb dgebacf gc
+cg cg fdcagb cbg
+efabcd cedba gadfec cb
+gecf egdcabf bgf bfgea
+gebdcfa ecba ca fadegcb
+cefg dcbef fcge gbcadfe
+ed bcgafe cdgba cbgef
+gbdfcae bgc cg cgb
+fgae cfgab fg bagce
+
+# lengths..
+
+7 abcde abcdef 4
+fcgedb 3 7 2
+2 2 fdcagb 3
+efabcd cedba gadfec 2
+4 7 3 bfgea
+gebdcfa 4 2 7
+4 dcbef 4 7
+2 bcgafe cdgba cbgef
+7 3 2 3
+4 cfgab 2 bagce
+
+# looking for 2437 lengths
+
+7 abcde abcdef 4 = 2
+fcgedb 3 7 2 = 3
+2 2 fdcagb 3 = 3
+efabcd cedba gadfec 2 = 1
+gecf 7 3 bfgea = 2
+gebdcfa 4 2 7 = 3
+4 dcbef 4 7 = 3 
+2 bcgafe cdgba cbgef = 2
+7 3 2 3 = 4
+4 cfgab 2 bagce = 2
+
+# adding up
+
+2
+3 = 5
+3 = 8
+1 = 9
+2 = 11
+3 = 14
+3 = 17
+2 = 19
+4 = 23
+2 = 25
+

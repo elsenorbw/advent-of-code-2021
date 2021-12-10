@@ -37,6 +37,27 @@
 
 # Find all of the low points on your heightmap. What is the sum of the risk
 # levels of all low points on your heightmap?
+import math
+
+
+def leftof(location):
+    x, y = location
+    return (x - 1, y)
+
+
+def rightof(location):
+    x, y = location
+    return (x + 1, y)
+
+
+def upof(location):
+    x, y = location
+    return (x, y - 1)
+
+
+def downof(location):
+    x, y = location
+    return (x, y + 1)
 
 
 class CavernFloor:
@@ -124,6 +145,53 @@ class CavernFloor:
                 total += 1 + self._get_value_at_location(this_location)
         return total
 
+    def find_low_points(self):
+        """
+        Return a list of low-point locations
+        """
+        result = []
+        for this_location in self.spots:
+            if self._is_low_point(this_location):
+                result.append(this_location)
+        return result
+
+    def _find_places_from_here(self, location, already_seen):
+        """
+        how many orthoganol-connections is this shape ?
+        """
+        # been here before ? die then..
+        if location in already_seen:
+            return 0
+        # never seen this place.. cool... is it a valid place ?
+        if location not in self.spots:
+            return 0
+        # it is a valid place - sold..
+        already_seen.add(location)
+        total = 1
+        total += self._find_places_from_here(leftof(location), already_seen)
+        total += self._find_places_from_here(rightof(location), already_seen)
+        total += self._find_places_from_here(upof(location), already_seen)
+        total += self._find_places_from_here(downof(location), already_seen)
+        return total
+
+    def find_basin_size(self, location):
+        """
+        Find the count of all the points connected to this location
+        """
+        # a little worried about having looping basins.. so going to keep a list and make sure we don't double back..
+        places_we_have_seen = set()
+        total = self._find_places_from_here(location, places_we_have_seen)
+        return total
+
+    def remove_high_ground(self):
+        """
+        Get rid of anything that's a 9
+        """
+        for x in range(self.min_x, self.max_x + 1):
+            for y in range(self.min_y, self.max_y + 1):
+                if 9 == self.spots[(x, y)]:
+                    del self.spots[(x, y)]
+
     def __repr__(self) -> str:
         result = f"CavernFloor [{self.max_x - self.min_x + 1}x{self.max_y - self.min_y + 1}] ({self.min_x},{self.min_y})-({self.max_x},{self.max_y})\n"
         for y in range(self.min_y, self.max_y + 1):
@@ -146,10 +214,30 @@ def part1(filename: str) -> int:
     return result
 
 
+def part2(filename: str) -> int:
+    """
+    Solve part2
+    """
+    cave = CavernFloor(filename)
+    low_points = cave.find_low_points()
+    cave.remove_high_ground()
+    print(cave)
+    print(low_points)
+    basin_sizes = [cave.find_basin_size(location) for location in low_points]
+    print(basin_sizes)
+    sorted_sizes = sorted(basin_sizes, reverse=True)
+    print(sorted_sizes)
+    top_3 = sorted_sizes[:3]
+    print(top_3)
+    result = math.prod(top_3)
+    return result
+
+
 if __name__ == "__main__":
     test_filename = "test_input.txt"
     puzzle_filename = "puzzle_input.txt"
     expected_test_part1 = 15
+    expected_test_part2 = 1134
 
     test1 = part1(test_filename)
     print(f"Test part 1 output: {test1} (should be {expected_test_part1})")
@@ -157,3 +245,10 @@ if __name__ == "__main__":
 
     puzz1 = part1(puzzle_filename)
     print(f"Part 1 output: {puzz1}")
+
+    test2 = part2(test_filename)
+    print(f"Test part 2 output: {test2} (should be {expected_test_part2})")
+    assert test2 == expected_test_part2
+
+    puzz2 = part2(puzzle_filename)
+    print(f"Part 2 output: {puzz2}")

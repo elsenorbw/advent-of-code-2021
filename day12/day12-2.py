@@ -118,6 +118,63 @@
 # How many paths through this cave system are there that visit small caves at
 # most once?
 
+# Your puzzle answer was 4749.
+
+# The first half of this puzzle is complete! It provides one gold star: *
+# --- Part Two ---
+
+# After reviewing the available paths, you realize you might have time to visit
+# a single small cave twice. Specifically, big caves can be visited any number
+# of times, a single small cave can be visited at most twice, and the remaining
+# small caves can be visited at most once. However, the caves named start and
+# end can only be visited exactly once each: once you leave the start cave,
+# you may not return to it, and once you reach the end cave, the path must end
+# immediately.
+
+# Now, the 36 possible paths through the first example above are:
+
+# start,A,b,A,b,A,c,A,end
+# start,A,b,A,b,A,end
+# start,A,b,A,b,end
+# start,A,b,A,c,A,b,A,end
+# start,A,b,A,c,A,b,end
+# start,A,b,A,c,A,c,A,end
+# start,A,b,A,c,A,end
+# start,A,b,A,end
+# start,A,b,d,b,A,c,A,end
+# start,A,b,d,b,A,end
+# start,A,b,d,b,end
+# start,A,b,end
+# start,A,c,A,b,A,b,A,end
+# start,A,c,A,b,A,b,end
+# start,A,c,A,b,A,c,A,end
+# start,A,c,A,b,A,end
+# start,A,c,A,b,d,b,A,end
+# start,A,c,A,b,d,b,end
+# start,A,c,A,b,end
+# start,A,c,A,c,A,b,A,end
+# start,A,c,A,c,A,b,end
+# start,A,c,A,c,A,end
+# start,A,c,A,end
+# start,A,end
+# start,b,A,b,A,c,A,end
+# start,b,A,b,A,end
+# start,b,A,b,end
+# start,b,A,c,A,b,A,end
+# start,b,A,c,A,b,end
+# start,b,A,c,A,c,A,end
+# start,b,A,c,A,end
+# start,b,A,end
+# start,b,d,b,A,c,A,end
+# start,b,d,b,A,end
+# start,b,d,b,end
+# start,b,end
+
+# The slightly larger example above now has 103 paths through it, and the even
+# larger example now has 3509 paths through it.
+
+# Given these new rules, how many paths through this cave system are there?
+
 
 from os import path
 
@@ -165,7 +222,7 @@ class Mapper:
                     assert len(caves) == 2
                     self.add_cave_mapping(caves[0], caves[1])
 
-    def find_routes_from_here(self, this_node, path_so_far, all_paths):
+    def find_routes_from_here(self, this_node, path_so_far, small_cave, all_paths):
         """
         Starting from here, list out all the routes to the "end" node
         """
@@ -178,9 +235,25 @@ class Mapper:
             if "end" == next_node:
                 all_paths.add(tuple(path_so_far + ["end"]))
             else:
-                # ok, it's a mid-path node.. can we go here ?
-                if Mapper.is_large_cave(next_node) or next_node not in path_so_far:
-                    self.find_routes_from_here(next_node, path_so_far, all_paths)
+                # ok, it's a mid-path node.. slightly more complicated logic
+                if Mapper.is_large_cave(next_node):
+                    self.find_routes_from_here(
+                        next_node, path_so_far, small_cave, all_paths
+                    )
+                else:
+                    # small cave, couple of rules..
+                    if next_node not in path_so_far:
+                        # we can go here..
+                        self.find_routes_from_here(
+                            next_node, path_so_far, small_cave, all_paths
+                        )
+                    elif 0 == len(small_cave) and "start" != next_node:
+                        # we can use this as our special double-node..
+                        small_cave.append(next_node)
+                        self.find_routes_from_here(
+                            next_node, path_so_far, small_cave, all_paths
+                        )
+                        small_cave.pop()
 
         # 3) Remove this node from the path so far, we are done..
         path_so_far.pop()
@@ -191,14 +264,16 @@ class Mapper:
         """
         all_paths = set()
         path_so_far = []
+        # this could just as easily be a bool flag on reflection..
+        small_cave = []
 
         # starting at "start"
-        self.find_routes_from_here("start", path_so_far, all_paths)
+        self.find_routes_from_here("start", path_so_far, small_cave, all_paths)
 
         return all_paths
 
 
-def part1(filename: str) -> int:
+def part2(filename: str) -> int:
     """
     Run the part1 logic
     """
@@ -211,15 +286,15 @@ def part1(filename: str) -> int:
 
 
 if __name__ == "__main__":
-    part1_tests = [("test_10.txt", 10), ("test_19.txt", 19), ("test_226.txt", 226)]
+    part2_tests = [("test_10.txt", 36), ("test_19.txt", 103), ("test_226.txt", 3509)]
     puzzle_filename = "puzzle_input.txt"
 
     # Run part1 tests
-    for filename, expected in part1_tests:
-        actual = part1(filename)
+    for filename, expected in part2_tests:
+        actual = part2(filename)
         print(f"Testing with {filename}, got {actual}, expected {expected}")
         assert actual == expected
 
-    # run the actual part1
-    puzz1 = part1(puzzle_filename)
-    print(f"Actual Part1 answer is {puzz1}")
+    # run the actual part2
+    puzz2 = part2(puzzle_filename)
+    print(f"Actual Part2 answer is {puzz2}")

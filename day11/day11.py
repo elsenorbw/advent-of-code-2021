@@ -321,6 +321,56 @@
 # To begin, get your puzzle input.
 
 
+# --- Part Two ---
+
+# It seems like the individual flashes aren't bright enough to navigate.
+# However, you might have a better option: the flashes seem to be
+# synchronizing!
+
+# In the example above, the first time all octopuses flash simultaneously is
+# step 195:
+
+# After step 193:
+# 5877777777
+# 8877777777
+# 7777777777
+# 7777777777
+# 7777777777
+# 7777777777
+# 7777777777
+# 7777777777
+# 7777777777
+# 7777777777
+
+# After step 194:
+# 6988888888
+# 9988888888
+# 8888888888
+# 8888888888
+# 8888888888
+# 8888888888
+# 8888888888
+# 8888888888
+# 8888888888
+# 8888888888
+
+# After step 195:
+# 0000000000
+# 0000000000
+# 0000000000
+# 0000000000
+# 0000000000
+# 0000000000
+# 0000000000
+# 0000000000
+# 0000000000
+# 0000000000
+
+# If you can calculate the exact moments when the octopuses will all flash
+# simultaneously, you should be able to navigate through the cavern. What is
+# the first step during which all octopuses flash?
+
+
 class OctopusField:
     def __init__(self) -> None:
         self.grid = dict()
@@ -412,6 +462,24 @@ class OctopusField:
         for this_location in flashed_this_round:
             self.grid[this_location] = 0
 
+        # and return how many were changed
+        return len(flashed_this_round)
+
+    def cycle_until_synch(self):
+        """
+        Cycle the octopuses until they synchronise
+        """
+        iteration = 1
+        total_octupuses = len(self.grid)
+        changed_this_time = self.cycle_once()
+        while changed_this_time != total_octupuses:
+            # go again..
+            iteration += 1
+            changed_this_time = self.cycle_once()
+
+        # and we're done..
+        return iteration
+
 
 def part1(filename: str) -> int:
     """
@@ -426,11 +494,21 @@ def part1(filename: str) -> int:
     result = field.flashes
     return result
 
+def part2(filename: str) -> int:
+    """
+    iterate until we've got synchronisation
+    """
+    field = OctopusField()
+    field.load_file(filename)
+    result = field.cycle_until_synch()
+    return result
+
 
 if __name__ == "__main__":
     test_filename = "test_input.txt"
     puzzle_filename = "puzzle_input.txt"
     test1_expected = 1656
+    test2_expected = 195
 
     test1 = part1(test_filename)
     print(f"Test1: {test1} - should be {test1_expected}")
@@ -438,3 +516,13 @@ if __name__ == "__main__":
 
     puzz1 = part1(puzzle_filename)
     print(f"Part1: {puzz1}")
+
+    test2 = part2(test_filename)
+    print(f"Test2: {test2} - should be {test2_expected}")
+    assert test2 == test2_expected
+
+    puzz2 = part2(puzzle_filename)
+    print(f"Part2: {puzz2}")
+
+
+

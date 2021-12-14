@@ -1,0 +1,26 @@
+[youtube] YpJAmlnBxoA: Downloading webpage
+[info] Available formats for YpJAmlnBxoA:
+format code  extension  resolution note
+249          webm       audio only tiny   54k , webm_dash container, opus @ 54k (48000Hz), 1.29MiB
+250          webm       audio only tiny   69k , webm_dash container, opus @ 69k (48000Hz), 1.65MiB
+140          m4a        audio only tiny  129k , m4a_dash container, mp4a.40.2@129k (44100Hz), 3.06MiB
+251          webm       audio only tiny  131k , webm_dash container, opus @131k (48000Hz), 3.12MiB
+394          mp4        256x144    144p   68k , mp4_dash container, av01.0.00M.08@  68k, 24fps, video only, 1.63MiB
+278          webm       256x144    144p   90k , webm_dash container, vp9@  90k, 24fps, video only, 2.14MiB
+160          mp4        256x144    144p  100k , mp4_dash container, avc1.4d400c@ 100k, 24fps, video only, 2.38MiB
+395          mp4        426x240    240p  146k , mp4_dash container, av01.0.00M.08@ 146k, 24fps, video only, 3.47MiB
+242          webm       426x240    240p  203k , webm_dash container, vp9@ 203k, 24fps, video only, 4.82MiB
+133          mp4        426x240    240p  264k , mp4_dash container, avc1.4d4015@ 264k, 24fps, video only, 6.25MiB
+396          mp4        640x360    360p  301k , mp4_dash container, av01.0.01M.08@ 301k, 24fps, video only, 7.13MiB
+243          webm       640x360    360p  360k , webm_dash container, vp9@ 360k, 24fps, video only, 8.53MiB
+134          mp4        640x360    360p  484k , mp4_dash container, avc1.4d401e@ 484k, 24fps, video only, 11.45MiB
+397          mp4        854x480    480p  526k , mp4_dash container, av01.0.04M.08@ 526k, 24fps, video only, 12.45MiB
+244          webm       854x480    480p  564k , webm_dash container, vp9@ 564k, 24fps, video only, 13.35MiB
+135          mp4        854x480    480p  681k , mp4_dash container, avc1.4d401e@ 681k, 24fps, video only, 16.11MiB
+398          mp4        1280x720   720p  944k , mp4_dash container, av01.0.05M.08@ 944k, 24fps, video only, 22.34MiB
+247          webm       1280x720   720p  976k , webm_dash container, vp9@ 976k, 24fps, video only, 23.10MiB
+136          mp4        1280x720   720p  995k , mp4_dash container, avc1.4d401f@ 995k, 24fps, video only, 23.54MiB
+399          mp4        1920x1080  1080p 1607k , mp4_dash container, av01.0.08M.08@1607k, 24fps, video only, 38.03MiB
+248          webm       1920x1080  1080p 2341k , webm_dash container, vp9@2341k, 24fps, video only, 55.37MiB
+137          mp4        1920x1080  1080p 3141k , mp4_dash container, avc1.640028@3141k, 24fps, video only, 74.30MiB
+18           mp4        640x360    360p  722k , avc1.42001E, 24fps, mp4a.40.2 (44100Hz), 17.08MiB (best)

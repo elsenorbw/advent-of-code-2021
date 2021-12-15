@@ -161,46 +161,14 @@ class Polymer:
                         # must be the polymer
                         self.poly = this_line
 
-    def naive_step(self):
+    def calculate_expected_element_count(self, iterations: int) -> int:
         """
-        Produce the next evolution of the polymer
+        How many total elements should be in the output?
         """
-        this_poly = self.poly
-        current_length = len(this_poly)
-        next_poly = ""
-        for x in range(current_length - 1):
-            key = this_poly[x : x + 2]
-            new_bit = self.rules[key]
-            next_poly += this_poly[x]
-            next_poly += new_bit
-        # and add the last character..
-        next_poly += this_poly[-1]
-        # and we're done..
-        # print(f"{this_poly} -> {next_poly}")
-        self.poly = next_poly
-
-    def step(self):
-        """
-        Produce the next evolution of the polymer
-        but faster..
-        """
-        this_poly = self.poly
-        next_poly = []
-
-        this_char = this_poly[0]
-        for next_char in this_poly[1:]:
-            key = this_char + next_char
-            new_bit = self.rules[key]
-            next_poly.append(this_char)
-            next_poly.append(new_bit)
-            # shuffle down
-            this_char = next_char
-
-        # and add the last character..
-        next_poly.append(this_poly[-1])
-        # and we're done..
-        # print(f"{this_poly} -> {next_poly}")
-        self.poly = "".join(next_poly)
+        result = len(self.poly)
+        for _ in range(iterations):
+            result += result - 1
+        return result
 
     def one_small_step_for_man(self, desired_iterations: int):
         """
@@ -235,22 +203,12 @@ class Polymer:
             # add them to final counts..
             final_counts = Melter.dict_merge(final_counts, these_counts)
 
+        # and remember not to double-count the middles..
+        for x in self.poly[1:-1]:
+            final_counts[x] -= 1
+
         # and we're done..
         return final_counts
-
-    def element_counts(self):
-        """
-        Return a dictionary of elements and their frequencies
-        """
-        result = dict()
-
-        for this_element in self.poly:
-            if this_element not in result:
-                result[this_element] = 1
-            else:
-                result[this_element] += 1
-
-        return result
 
 
 def partx(filename: str, iterations: int) -> int:
@@ -264,7 +222,13 @@ def partx(filename: str, iterations: int) -> int:
     print(elements)
     frequencies = elements.values()
     sorted_frequencies = tuple(sorted(frequencies))
-    print(sorted_frequencies)
+    element_total = sum(sorted_frequencies)
+    expected_element_total = poly.calculate_expected_element_count(iterations)
+    print(
+        f"Expected total element count {element_total}, expected {expected_element_total}"
+    )
+    assert expected_element_total == element_total
+    print(f"Sorted frequency list: {sorted_frequencies}")
     smallest = sorted_frequencies[0]
     largest = sorted_frequencies[-1]
 

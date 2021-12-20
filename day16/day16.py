@@ -203,8 +203,24 @@ class HexBinaryThingy:
         return result
 
 
+# Packets with type ID 0 are sum packets - their value is the sum of the values of their sub-packets. If they only have a single sub-packet, their value is the value of the sub-packet.
+# Packets with type ID 1 are product packets - their value is the result of multiplying together the values of their sub-packets. If they only have a single sub-packet, their value is the value of the sub-packet.
+# Packets with type ID 2 are minimum packets - their value is the minimum of the values of their sub-packets.
+# Packets with type ID 3 are maximum packets - their value is the maximum of the values of their sub-packets.
+# Packets with type ID 5 are greater than packets - their value is 1 if the value of the first sub-packet is greater than the value of the second sub-packet; otherwise, their value is 0. These packets always have exactly two sub-packets.
+# Packets with type ID 6 are less than packets - their value is 1 if the value of the first sub-packet is less than the value of the second sub-packet; otherwise, their value is 0. These packets always have exactly two sub-packets.
+# Packets with type ID 7 are equal to packets - their value is 1 if the value of the first sub-packet is equal to the value of the second sub-packet; otherwise, their value is 0. These packets always have exactly two sub-packets.
+
+
 class Packet:
     TYPE_UNKNOWN = -1
+    TYPE_SUM = 0
+    TYPE_PRODUCT = 1
+    TYPE_MIN = 2
+    TYPE_MAX = 3
+    TYPE_GT = 5
+    TYPE_LT = 6
+    TYPE_EQUAL = 7
     TYPE_LITERAL = 4
 
     def __init__(self, bits, depth=0) -> None:
@@ -222,6 +238,43 @@ class Packet:
         for this_packet in self.child_packets:
             result += str(this_packet)
 
+        return result
+
+    def evaluate(self):
+        """
+        Return the value for this packet
+        """
+        child_values = [p.evaluate() for p in self.child_packets]
+
+        if self.type == Packet.TYPE_SUM:
+            result = sum(child_values)
+        elif self.type == Packet.TYPE_PRODUCT:
+            result = 1
+            for x in child_values:
+                result *= x
+        elif self.type == Packet.TYPE_MIN:
+            result = min(child_values)
+        elif self.type == Packet.TYPE_MAX:
+            result = max(child_values)
+        elif self.type == Packet.TYPE_GT:
+            if child_values[0] > child_values[1]:
+                result = 1
+            else:
+                result = 0
+        elif self.type == Packet.TYPE_LT:
+            if child_values[0] < child_values[1]:
+                result = 1
+            else:
+                result = 0
+        elif self.type == Packet.TYPE_EQUAL:
+            if child_values[0] == child_values[1]:
+                result = 1
+            else:
+                result = 0
+        elif self.type == Packet.TYPE_LITERAL:
+            return self.value
+        else:
+            raise ValueError(f"What the hell is a {self.type} operator ???")
         return result
 
     def sum_versions(self):
@@ -318,6 +371,30 @@ def part1(filename: str) -> int:
     return container.sum_versions()
 
 
+def part2(filename: str) -> int:
+    """
+    Run the part2 logic..
+    """
+    hex_digits = ""
+    with open(filename, "r") as f:
+
+        for this_line in f:
+            this_line = this_line.strip()
+            if "" != this_line:
+                hex_digits += this_line
+
+    # load them into the binary provider thingy..
+    binary = HexBinaryThingy()
+    binary.load_hex_digits(hex_digits)
+
+    # Create the Packet Parser with these bits..
+    container = Packet(binary)
+    result = container.evaluate()
+
+    # return the thingy count thingy TBD
+    return result
+
+
 def bin_to_hex(bits: str):
     """
     Return a hex string for a binary string
@@ -360,6 +437,35 @@ def sanity_check():
     container = Packet(binary)
     print(container)
 
+    # Part 2 sanity check..
+
+    # C200B40A82 finds the sum of 1 and 2, resulting in the value 3.
+    # 04005AC33890 finds the product of 6 and 9, resulting in the value 54.
+    # 880086C3E88112 finds the minimum of 7, 8, and 9, resulting in the value 7.
+    # CE00C43D881120 finds the maximum of 7, 8, and 9, resulting in the value 9.
+    # D8005AC2A8F0 produces 1, because 5 is less than 15.
+    # F600BC2D8F produces 0, because 5 is not greater than 15.
+    # 9C005AC2F8F0 produces 0, because 5 is not equal to 15.
+    # 9C0141080250320F1802104A08 produces 1, because 1 + 3 = 2 * 2.
+
+    evaluation_tests = [
+        ("C200B40A82", 3),
+        ("04005AC33890", 54),
+        ("880086C3E88112", 7),
+        ("CE00C43D881120", 9),
+        ("D8005AC2A8F0", 1),
+        ("F600BC2D8F", 0),
+        ("9C005AC2F8F0", 0),
+        ("9C0141080250320F1802104A08", 1),
+    ]
+    for hex, expected in evaluation_tests:
+        binary = HexBinaryThingy()
+        binary.load_hex_digits(hex)
+        container = Packet(binary)
+        actual = container.evaluate()
+        print(f"Input {hex}, got {actual}, expected {expected}")
+        assert actual == expected
+
 
 if __name__ == "__main__":
     sanity_check()
@@ -379,3 +485,6 @@ if __name__ == "__main__":
     puzzle_filename = "puzzle_input.txt"
     puzz1 = part1(puzzle_filename)
     print(f"Part 1 actual result : {puzz1}")
+
+    puzz2 = part2(puzzle_filename)
+    print(f"Part 2 actual result : {puzz2}")

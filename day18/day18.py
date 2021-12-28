@@ -406,8 +406,37 @@ def part1(filename: str):
     return total.magnitude()
 
 
+def part2(filename: str):
+    """
+    Find the largest magnitude for any single pair addition in the list provided.
+    """
+    number_list = []
+    with open(filename, "r") as f:
+        for this_line in f:
+            this_line = this_line.strip()
+            if "" != this_line:
+                number_list.append(this_line)
+
+    best_magnitude = -99999
+    for a in number_list:
+        for b in number_list:
+            if a != b:
+                # if there are duplicates, and they are the best answer, then we'll be back here swearing later on..
+                ax = SnailfishNumber.parse(a)
+                bx = SnailfishNumber.parse(b)
+                cx = SnailfishNumber.add(ax, bx)
+                this_magnitude = cx.magnitude()
+                if this_magnitude > best_magnitude:
+                    best_magnitude = this_magnitude
+                    print(f"Best so far: {best_magnitude}: {a} + {b} = {cx}")
+    return best_magnitude
+
+
 if __name__ == "__main__":
 
     filename = "puzzle_input.txt"
     puzz1 = part1(filename)
     print(f"Part1 is {puzz1}")
+
+    puzz2 = part2(filename)
+    print(f"Part2 is {puzz2}")
